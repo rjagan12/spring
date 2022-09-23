@@ -58,6 +58,19 @@ public class CommonUtil {
         String regex = "[a-z\\sA-Z(.)]{2,30}";  
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(name);
+        return matcher.matches();
+    }
+
+    /**
+     * Method used to vaild the String and returns in boolean
+     * @param {@link String} name
+     * @return {@link boolean} if vaid returns true or false
+     */
+    public static boolean phoneNumberValidation(String number) {
+
+        String regex = "[6-9]{1}[0-9]{9}";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(number);
 
         return matcher.matches();
     }
@@ -99,5 +112,29 @@ public class CommonUtil {
         } 
         return true;
     }
-  
-}   
+
+    public static boolean panValidation(String panNumber) {
+        String regex = "[a-zA-z0-9]{10}";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(panNumber);
+
+        return matcher.matches();
+    }
+
+    public static boolean aadharValidation(Long aadharNumber) {
+        String number = String.valueOf(aadharNumber);
+        String regex = "[0-9]{12}";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(number);
+
+        return matcher.matches();
+    }
+
+    public static boolean addressValidation(String address) {
+        String regex = "[a-z\\sA-z0-9]{5,75}";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(address);
+
+        return matcher.matches();
+    }
+}

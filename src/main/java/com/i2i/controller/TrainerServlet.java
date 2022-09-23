@@ -2,12 +2,10 @@ package com.i2i.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.i2i.exception.NullListException;
 import com.i2i.model.Trainee;
 import com.i2i.model.Trainer;
 import com.i2i.service.EmployeeService;
 import com.i2i.service.impl.EmployeeServiceImpl;
-import com.i2i.util.CommonUtil;
 import org.hibernate.HibernateException;
 
 import javax.servlet.ServletException;
@@ -19,6 +17,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public class TrainerServlet extends HttpServlet {
 
@@ -76,7 +75,7 @@ public class TrainerServlet extends HttpServlet {
                     + (trainer.getRole()) + ("\n") + (line));
         }
 
-    }
+    }  */
 
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response)
@@ -140,14 +139,16 @@ public class TrainerServlet extends HttpServlet {
             }
         }
     }
-   */
+/*
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String pathInfo = request.getPathInfo();
+        String uri = request.getRequestURI();
         String message = "***** Not Inserted ******";
-
-        if (pathInfo == null || pathInfo.equals("/")) {
+        System.out.println(uri);
+        String name = request.getParameter("name");
+        System.out.println(name);
+        if (uri != null) {
             StringBuilder buffer = new StringBuilder();
             BufferedReader reader = request.getReader();
             String line;
@@ -156,7 +157,8 @@ public class TrainerServlet extends HttpServlet {
                 buffer.append(line);
             }
             String payload = buffer.toString();
-            Trainer trainer = mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS).findAndRegisterModules().readValue(payload, Trainer.class);
+            Trainer trainer = mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                    .findAndRegisterModules().readValue(payload, Trainer.class);
 
             try {
                 message = employeeService.addTrainerDetails(trainer);
@@ -170,7 +172,7 @@ public class TrainerServlet extends HttpServlet {
             response.getOutputStream().println(message);
         }
     }
-
+*/
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -195,6 +197,7 @@ public class TrainerServlet extends HttpServlet {
                 trainer = employeeService.showTrainerDetailsById(trainerId);
                 int traineeId = Integer.parseInt(request.getParameter("traineeId"));
                 message = employeeService.removeIdFromAssignedTrainer(traineeId, removeTrainee(traineeId, trainer));
+                response.getOutputStream().println(message);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -230,17 +233,17 @@ public class TrainerServlet extends HttpServlet {
         String uri = request.getRequestURI();
         List<Trainer> showTrainer = null;
 
-        if (uri.equals("/ServletExample/trainers")) {
+        if (uri.equals("/demoservlet/Trainers")) {
             try {
                 showTrainer = employeeService.showAllTrainerDetails();
 
             PrintWriter printWriter = response.getWriter();
             for(Trainer trainers : showTrainer) {
-                // Map<String, Employee> trainers1 = employeeServiceImpl.getObject(trainers);
+                Map<String, Object> trainer = employeeService.getTrainerObject(trainers);
+                String jsonStr = mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                        .findAndRegisterModules().writeValueAsString(trainer);
+                printWriter.print(jsonStr);
             }
-            String jsonStr = mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                    .findAndRegisterModules().writeValueAsString(showTrainer);
-            printWriter.print(jsonStr);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -255,11 +258,12 @@ public class TrainerServlet extends HttpServlet {
                 throw new RuntimeException(e);
             }
             if (trainer != null) {
-
+                Map<String, Object> trainer1 = employeeService.getTrainerObject(trainer);
                 String jsonStr = mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                        .findAndRegisterModules().writeValueAsString(trainer);
-               // String jsonStr = mapper.writeValueAsString(trainer);
+                        .findAndRegisterModules().writeValueAsString(trainer1);
                 printWriter.print(jsonStr);
+               // String jsonStr = mapper.writeValueAsString(trainer);
+
 
             } else {
                 printWriter.println("Invalid Employee ID");
@@ -267,7 +271,7 @@ public class TrainerServlet extends HttpServlet {
 
         }
     }
-/*
+
    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -297,5 +301,9 @@ public class TrainerServlet extends HttpServlet {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    } */
+    } 
+    private void dataValidation(HttpServletRequest request) {
+
+
+    }
 }

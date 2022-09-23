@@ -27,7 +27,7 @@ import java.util.List;
  * @version 1.0
  * @author Jaganathan R  
  */
-public class EmployeeDaoImpl implements EmployeeDao{
+public class  EmployeeDaoImpl implements EmployeeDao{
 
     /**
      * Method used to add All trainees Details 

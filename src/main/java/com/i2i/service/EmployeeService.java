@@ -1,10 +1,8 @@
 package com.i2i.service;
 
 import java.util.List;
+import java.util.Map;
 
-import com.i2i.model.Employee;
-import com.i2i.dao.EmployeeDao;
-import com.i2i.dao.impl.EmployeeDaoImpl;
 import com.i2i.model.Trainer;
 import com.i2i.model.Trainee;
 
@@ -41,8 +39,9 @@ public interface EmployeeService {
     public String deleteTraineeDetails(int id) throws Exception;
  
     /**
-     * Method used to show trainee Details by id 
-     * @param {@link int}traineeid  
+     * Method used to show trainee Details by id
+     *
+     * @param {@link int}traineeid
      * @return {@link Trainee }return traineeDetails
      */
     public Trainee showTraineeDetailsById(int traineeId) throws Exception;
@@ -117,4 +116,7 @@ public interface EmployeeService {
      * @return {@link String }return status
      */   
     public String removeIdFromAssignedTrainee(int traineesId, Trainee trainee) throws Exception;
+
+    public Map<String, Object> getTrainerObject(Trainer trainer);
+    public Map<String, Object> getTraineeObject(Trainee trainee);
 }

@@ -125,7 +125,7 @@ public class EmployeeController extends HttpServlet {
                     int value = scanner.nextInt();
 
                     if (1 == value) {
-                        //getAllTrainerDetails();
+                        getAllTrainerDetails();
                         System.out.println("Enter The Trainer ID to Remove ");
                         int id = scanner.nextInt();
                         logger.info((employeeService.showTrainerDetailsById(id) != null)
@@ -133,7 +133,7 @@ public class EmployeeController extends HttpServlet {
                                     : ("********** THERE IS NO RECORD *********"));
 
                     } else if (2 == value) {
-                        //getAllTraineeDetails();
+                        getAllTraineeDetails();
                         System.out.println("Enter The Trainee ID to Remove ");
                         int id = scanner.nextInt();
                         logger.info((employeeService.showTraineeDetailsById(id) != null)  
@@ -196,10 +196,10 @@ public class EmployeeController extends HttpServlet {
                     int choice = scanner.nextInt();
 
                     if (1 == choice) {
-                        //getAllTrainerDetails();
+                        getAllTrainerDetails();
 
                     } else if (2 == choice) {
-                        //getAllTraineeDetails();
+                        getAllTraineeDetails();
 
                     } else {
                         logger.error("{}",inValidData);    
@@ -213,7 +213,7 @@ public class EmployeeController extends HttpServlet {
                     int selectedValue = scanner.nextInt();
 
                     if (1 == selectedValue) { 
-                        //getAllTrainerDetails();
+                        getAllTrainerDetails();
                         System.out.println("Enter The Trainer Id"); 
                         int trainerId = scanner.nextInt();
                         Trainer trainer = employeeService.showTrainerDetailsById(trainerId);
@@ -222,7 +222,7 @@ public class EmployeeController extends HttpServlet {
                
                     } else if (2 == selectedValue) {
                         
-                        //getAllTraineeDetails();
+                        getAllTraineeDetails();
                         System.out.println("Enter The Trainee Id");  
                         int traineeId = scanner.nextInt();
                         Trainee trainee = employeeService.showTraineeDetailsById(traineeId);
@@ -234,7 +234,7 @@ public class EmployeeController extends HttpServlet {
                         int choosedValue = scanner.nextInt();
 
                         if (1 == choosedValue) {
-                            //getAllTrainerDetails();
+                            getAllTrainerDetails();
                             System.out.println("Enter the Trainer ID :");
         	            int trainerId = scanner.nextInt();
                             Trainer trainer = employeeService.showTrainerDetailsById(trainerId);
@@ -251,7 +251,7 @@ public class EmployeeController extends HttpServlet {
                             logger.info("{}", trainers); 
                        
                         } else if (2 == choosedValue) {
-                            //getAllTraineeDetails();
+                            getAllTraineeDetails();
                             System.out.println("Enter the Trainee ID :");
 		            int traineeId = scanner.nextInt();
                             Trainee trainee = employeeService.showTraineeDetailsById(traineeId);
@@ -601,7 +601,7 @@ public class EmployeeController extends HttpServlet {
      * @param{@noparam} 
      * @return {@link } no returns
      */   
-    /*private static void getAllTrainerDetails() throws Exception {
+    private static void getAllTrainerDetails() throws Exception {
 
         try {
             List<Trainer> listOfTrainers = employeeService.showAllTrainerDetails();
@@ -627,14 +627,14 @@ public class EmployeeController extends HttpServlet {
         } catch(HibernateException e) {
             throw e;
         } 
-    } */
+    }
      
     /**
      * Method used to print All details of the trainee 
      * @noparam  
      * @return {@link } no returns
      */ 
-    /*private static void getAllTraineeDetails() throws Exception {
+    private static void getAllTraineeDetails() throws Exception {
        
         List<Trainee> listOfTrainees = employeeService.showAllTraineeDetails();
 
@@ -658,7 +658,7 @@ public class EmployeeController extends HttpServlet {
         } catch(NullListException e) {
              System.out.println(e.getMessage());
         }      
-    } */
+    }
 
     /**
      * Method used to get update details of the trainer 
@@ -822,7 +822,7 @@ public class EmployeeController extends HttpServlet {
         List<Trainer> list = new ArrayList<>();
 
         try {            
-            //getAllTrainerDetails();
+            getAllTrainerDetails();
             System.out.println("How many Trainees to Add :(1-9)");
             int count = scanner.nextInt();
                    
@@ -847,7 +847,7 @@ public class EmployeeController extends HttpServlet {
         List<Trainee> list = new ArrayList<>();
         
         try {
-	    //getAllTraineeDetails();
+	    getAllTraineeDetails();
             System.out.println("How many Trainees to Add :(1-9)");
             int count = scanner.nextInt();
                    
@@ -959,7 +959,7 @@ public class EmployeeController extends HttpServlet {
             }
         } catch (NullListException ex) {
             throw new RuntimeException(ex);
-        } */
+        }
         @Override
         protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
             String uri = req.getRequestURI();
@@ -996,5 +996,5 @@ public class EmployeeController extends HttpServlet {
             resp.setStatus(200);
             resp.setHeader("Content-Type", "application/json");
 
-        }
+        } */
 }

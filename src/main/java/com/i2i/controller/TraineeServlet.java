@@ -2,11 +2,17 @@ package com.i2i.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.i2i.model.Trainee;
 import com.i2i.model.Trainer;
 import com.i2i.service.EmployeeService;
 import com.i2i.service.impl.EmployeeServiceImpl;
+import com.i2i.util.CommonUtil;
 import org.hibernate.HibernateException;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,16 +21,37 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * <h> TraineeServlet </h>
+ *  class used to extends HttpServlet and gives method definitions
+ *  to get, put, post and delete employee details from user to EmployeeServiceImpl
+ *  vice versa
+ *
+ * @version 1.0
+ * @author Jaganathan R
+ */
 public class TraineeServlet extends HttpServlet {
+
+    private static final String inValidData = (" ##********* //INVALID DATA// ************## ");
+    private static final String noData = (" ##********* // NO DATA // ************## ");
+    private static final Logger logger = LoggerFactory.getLogger(TraineeServlet.class);
+
     private static final String line = ("******************************************************");
     private static final EmployeeService employeeService = new EmployeeServiceImpl();
-    private ObjectMapper mapper = new ObjectMapper();
+    private  ObjectMapper mapper = new ObjectMapper();
+    private HttpServletResponse response;
 
-    /*
-    @Override
+    /**
+     * Method used to get trainer details  from server
+     * @param {@link HttpServletrequest, HttpServletResponse}request and response
+     * @return {noreturn}
+     */
+    /*@Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String uri = request.getRequestURI();
         List<Trainee> listOfTrainees = null;
@@ -74,10 +101,17 @@ public class TraineeServlet extends HttpServlet {
                              + (trainee.getRole())+("\n")+(line));
         }
 
-    }
-    @Override
+    } */
+
+    /**
+     * Method used to post trainee details to service from user
+     * @param {@link HttpServletRequest, HttpServletResponse}request and response
+     * @return {noreturn}
+     */
+   /*@Override
     protected void  doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         String message= "**** Not Inserted ****";
         String uri = request.getRequestURI();
         Trainee trainee = new Trainee();
@@ -105,36 +139,112 @@ public class TraineeServlet extends HttpServlet {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    } */
-    @Override
+    }
+     */
+
+    /**
+     * Method used to post trainee details to service from user
+     * @param {@link HttpServletRequest, HttpServletResponse}request and response
+     * @return noreturn
+     */
+   @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String pathInfo = request.getPathInfo();
-         String message = "***** Not Inserted ******";
-
-        if (pathInfo == null || pathInfo.equals("/")) {
-            StringBuilder builder = new StringBuilder();
-            BufferedReader reader = request.getReader();
-            String line;
-
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-            }
-            String payload = builder.toString();
-            Trainee trainee = mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                    .findAndRegisterModules().readValue(payload, Trainee.class);
-
-            try {
-                message = employeeService.addTraineeDetails(trainee);
+        String message = "";
+        String uri = request.getRequestURI();
+        try {
+            message = "***** Not Inserted ******";
+            if (uri.equals("/demoservlet/Trainee")) {
+                StringBuilder builder = new StringBuilder();
+                BufferedReader reader = request.getReader();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                }
+                String traineeDetails = builder.toString();
+                Trainee trainee = mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                        .findAndRegisterModules().readValue(traineeDetails, Trainee.class);
+                message = dataValidation(trainee, response);
+                response.getOutputStream().println(message );
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 response.getOutputStream().println(message);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
-        } else {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            response.getOutputStream().println(message);
+
+        } catch(DateTimeException | InvalidFormatException exception) {
+            response.getOutputStream().println(message + exception + "\n Please Enter The VALID DATE (yyyy-mm-dd)");
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
     }
+    private String dataValidation(Trainee trainee, HttpServletResponse response) throws Exception {
+        Trainee trainees = new Trainee();
+        String message = "*** INVALID INPUT **" ;
+         String name = trainee.getName();
+         if (CommonUtil.stringValidation(name)) {
+             trainees.setName(name);
+             String mail = trainee.getMail();
+             if (CommonUtil.mailValidation(mail)) {
+                 mail = mail.toLowerCase();
+                 trainees.setMail(mail);
+                 Long mobileNumber = trainee.getMobileNumber();
+                 String number = String.valueOf(mobileNumber);
+                 if ((CommonUtil.phoneNumberValidation(number))) {
+                     trainees.setMobileNumber(Long.parseLong(number));
+                     String role = trainee.getRole();
+                     if (CommonUtil.stringValidation(role)) {
+                         trainees.setRole(role);
+                         String panNumber = trainee.getPanNumber();
+                         if (CommonUtil.panValidation(panNumber)) {
+                             trainees.setPanNumber(panNumber);
+                             String address = trainee.getAddress();
+                             if (CommonUtil.addressValidation(address)) {
+                                 address.toUpperCase();
+                                 trainees.setAddress(address);
+                                 Long aadharNumber = trainee.getAadharNumber();
+                                 if (CommonUtil.aadharValidation(aadharNumber)) {
+                                     trainees.setAadharNumber(aadharNumber);
+                                     try {
+                                         LocalDate passOutYear = trainee.getPassOutYear();
+                                         trainees.setPassOutYear(LocalDate.of(passOutYear.getYear()
+                                                 , passOutYear.getMonthValue(), passOutYear.getDayOfMonth()));
+                                         LocalDate dateOfBirth = trainee.getDateOfBirth();
+                                         trainees.setDateOfBirth(LocalDate.of(dateOfBirth.getYear()
+                                                 , dateOfBirth.getMonthValue(), dateOfBirth.getDayOfMonth()));
+                                         LocalDate dateOfJoin = trainee.getDateOfJoin();
+                                         trainees.setDateOfJoin(LocalDate.of(dateOfJoin.getYear()
+                                                 , dateOfJoin.getMonthValue(), dateOfJoin.getDayOfMonth()));
+                                         message = employeeService.addTraineeDetails(trainees);
+                                     } catch (DateTimeException exception) {
+                                         throw new DateTimeException( "\n Please Enter The VALID DATE (yyyy-mm-dd)");
+                                     }catch(RuntimeException exception){
+                                         throw new RuntimeException(""+ exception);
+                                     }
+                                 } else {
+                                     response.getOutputStream().println(message +
+                                             "\nPlease Enter The Valid AadharNumber ");
+                                 }
+                             } else {
+                                 response.getOutputStream().println(message + "\nPlease Enter The Valid Address ");
+                             }
+                         } else {
+                             response.getOutputStream().println(message + "\nPlease Enter The Valid PanNumber ");
+                         }
+                     } else {
+                         response.getOutputStream().println(message + "\nPlease Enter The Valid role  ");
+                     }
+                 } else {
+                     response.getOutputStream().println(message + "\nPlease Enter The Valid Phone Number  ");
+                 }
+             } else {
+                 response.getOutputStream().println(message + "\nPlease Enter The Valid Mail  ");
+             }
+         } else {
+             response.getOutputStream().println(message + "\nPlease Enter The Valid Name  ");
+         }
+       return message ;
+    }
+
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -165,6 +275,11 @@ public class TraineeServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Method used to put or update trainee details to service from user
+     * @param {@link HttpServletRequest, HttpServletResponse}request and response
+     * @return {noreturn}
+     */
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -211,8 +326,8 @@ public class TraineeServlet extends HttpServlet {
                 System.out.println(ids+"trainerIds");
                 String[] trainerId = ids.split(",");
 
-                for (int i = 0; i < trainerId.length; i++) {
-                    int trainersId = Integer.valueOf(trainerId[i]);
+                for (String trainersIds: trainerId) {
+                    int trainersId = Integer.valueOf(trainersIds);
                     Trainer trainer = employeeService.showTrainerDetailsById(trainersId);
                     if (trainer != null) {
                         trainee.getTrainerDetails().add(trainer);
@@ -229,23 +344,28 @@ public class TraineeServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Method used to get trainer details  from server
+     * @param {@link HttpServletrequest, HttpServletResponse}request and response
+     * @return {noreturn}
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         String uri = request.getRequestURI();
-        List<Trainee> showTrainee = null;
+        List<Trainee> trainees = null;
 
-        if (uri.equals("/ServletExample/trainers")) {
+        if (uri.equals("/demoservlet/Trainees")) {
             try {
-                showTrainee = employeeService.showAllTraineeDetails();
-
+                trainees = employeeService.showAllTraineeDetails();
                 PrintWriter printWriter = response.getWriter();
-                for(Trainee trainees : showTrainee) {
-                    // Map<String, Employee> trainees1 = employeeServiceImpl.getObject(trainees);
+                for(Trainee traineelist  : trainees) {
+                    Map<String, Object> trainee = employeeService.getTraineeObject(traineelist);
+
+                    String jsonStr = mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                            .findAndRegisterModules().writeValueAsString(trainee);
+                    printWriter.print(jsonStr);
                 }
-                String jsonStr = mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                        .findAndRegisterModules().writeValueAsString(showTrainee);
-                printWriter.print(jsonStr);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -253,18 +373,19 @@ public class TraineeServlet extends HttpServlet {
             String id = request.getParameter("id");
             int traineeId = Integer.parseInt(id);
             PrintWriter printWriter = response.getWriter();
-            Trainee trainee = null;
+            Trainee traineeDetail = null;
             try {
-                trainee = employeeService.showTraineeDetailsById(traineeId);
+                traineeDetail = employeeService.showTraineeDetailsById(traineeId);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            if (trainee != null) {
+            if (traineeDetail != null) {
 
-                String jsonStr = mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                        .findAndRegisterModules().writeValueAsString(trainee);
-                // String jsonStr = mapper.writeValueAsString(trainee);
-                printWriter.print(jsonStr);
+                    Map<String, Object> list = employeeService.getTraineeObject(traineeDetail);
+                    String jsonStr = mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                            .findAndRegisterModules().writeValueAsString(list);
+                    // String jsonStr = mapper.writeValueAsString(trainee);
+                    printWriter.print(jsonStr);
 
             } else {
                 printWriter.println("Invalid Employee ID");
@@ -272,7 +393,13 @@ public class TraineeServlet extends HttpServlet {
 
         }
     }
-    private  Trainee removeTrainer( int trainerId, Trainee trainee) throws Exception {
+
+    /**
+     * Method used to delete trainer details from assign trainees
+     * @param {@link Int, Trainee}id and trainee object
+     * @return {@link Trainee}trainee Object
+     */
+    private  Trainee removeTrainer(int trainerId, Trainee trainee) throws Exception {
         List<Trainer> list =trainee.getTrainerDetails();
         try {
             if (list.size() >= 1) {
@@ -288,8 +415,39 @@ public class TraineeServlet extends HttpServlet {
             }
 
         } catch(HibernateException e) {
-            throw e;
+            throw new HibernateException(e);
         }
         return trainee;
     }
+    /*@Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    try{
+        StringBuilder sb = new StringBuilder();
+        BufferedReader br = request.getReader();
+        String str = null;
+        while ((str = br.readLine()) != null) {
+            sb.append(str);
+            System.out.println("List of Trainee Details : "+str);
+        }
+        JSONObject jObj = new JSONObject();
+        System.out.println("JObj of Input"+jObj);
+        String name = String.valueOf(jObj.getString("Name"));
+        System.out.println(name);
+        String number = String.valueOf(jObj.("mobileNumber"));
+        String pan = String.valueOf(jObj.("panNumber"));
+        Long aadharNumber = Long.valueOf((jObj.("aadharNumber")));
+        String role = String.valueOf(jObj.("role"));
+        String address = String.valueOf(jObj.("address"));
+        LocalDate dateOfBirth =LocalDate.parse((CharSequence) jObj.("dateOfBirth"));
+        LocalDate dateOfJoinate = LocalDate.parse((CharSequence) jObj.("dateOfJoin"));
+        LocalDate passOutYear =LocalDate.parse((CharSequence) jObj.("passOutYear"));
+        response.setContentType("Trainee");
+        PrintWriter out = response.getWriter();
+        //out.print(jObj.toString());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+   }*/
+
+
 }

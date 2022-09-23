@@ -1,10 +1,12 @@
 package com.i2i.service.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.i2i.dao.EmployeeDao;
 import com.i2i.dao.impl.EmployeeDaoImpl;
-import com.i2i.model.Employee;
 import com.i2i.model.Trainer;
 import com.i2i.model.Trainee;
 import com.i2i.service.EmployeeService;
@@ -58,8 +60,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
-     * Method used to show trainee Details by id 
-     * @param {@link int}traineeid  
+     * Method used to show trainee Details by id
+     *
+     * @param {@link int}traineeid
      * @return {@link Trainee }return traineeDetails
      */
     @Override
@@ -176,6 +179,48 @@ public class EmployeeServiceImpl implements EmployeeService {
     public String removeIdFromAssignedTrainee(int traineesId, Trainee trainee) throws Exception {
 
 	return employeeDao.updateTraineeDetails(traineesId,trainee); 
-    }                  
-  
+    }
+
+    @Override
+    public Map<String, Object> getTrainerObject(Trainer trainer) {
+        List<Map<String, Object>> trainee = new ArrayList<>();
+        List<Trainee> list = trainer.getTraineeDetails();
+
+        for(Trainee traineeList : list){
+            Map<String,Object> listTrainee = new HashMap<>();
+            listTrainee.put("traineeId",traineeList.getId());
+            listTrainee.put("Trainee Name",traineeList.getName());
+            trainee.add(listTrainee);
+
+        }
+        Map<String,Object> map = new HashMap<>();
+        map.put("trainer Id",trainer.getId());
+        map.put("Trainer Name",trainer.getName());
+        map.put("Trainer Mail",trainer.getMail());
+        map.put("Trainer Role" ,trainer.getRole());
+        map.put("Trainer Mobile Number", trainer.getMobileNumber());
+        map.put("trainees", trainee);
+        return map;
+    }
+    @Override
+    public Map<String, Object> getTraineeObject(Trainee trainee) {
+
+        List<Map<String, Object>> trainer = new ArrayList<>();
+        List<Trainer> list = trainee.getTrainerDetails();
+
+        for(Trainer trainerList : list){
+            Map<String,Object> listTrainer = new HashMap<>();
+            listTrainer.put("trainerId",trainerList.getId());
+            listTrainer.put("Trainer Name",trainerList.getName());
+            trainer.add(listTrainer);
+        }
+        Map<String,Object> map = new HashMap<>();
+        map.put("trainee Id",trainee.getId());
+        map.put("Trainee Name",trainee.getName());
+        map.put("Trainee Mail",trainee.getMail());
+        map.put("Trainee Role" ,trainee.getRole());
+        map.put("Trainee Mobile Number", trainee.getMobileNumber());
+        map.put("trainers", trainer);
+        return map;
+    }
 }
