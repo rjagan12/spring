@@ -35,7 +35,7 @@ public class EmployeeController extends HttpServlet {
     private static final String noData = (" ##********* // NO DATA // ************## ");
     private static final String line = ("******************************************************");
     private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
-    private static final EmployeeService employeeService = new EmployeeServiceImpl();
+    private static EmployeeService employeeService;
 
     /**
      * Method used to show menu to get and set employer Details 

@@ -4,15 +4,14 @@ import com.i2i.configure.ConfigureClass;
 import com.i2i.dao.EmployeeDao;
 import com.i2i.model.Trainee;
 import com.i2i.model.Trainer;
-import com.i2i.service.EmployeeService;
-import com.i2i.service.impl.EmployeeServiceImpl;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.HibernateException; 
 import org.hibernate.Session; 
 import org.hibernate.Transaction;
-
+import org.springframework.stereotype.Repository;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +26,8 @@ import java.util.List;
  * @version 1.0
  * @author Jaganathan R  
  */
+@Repository
+@Transactional
 public class  EmployeeDaoImpl implements EmployeeDao{
 
     /**
@@ -141,7 +142,8 @@ public class  EmployeeDaoImpl implements EmployeeDao{
         List<Trainee> trainees = new ArrayList<>(); 
 
         try (Session session = ConfigureClass.getFactory().openSession();) {
-            Criteria criteria = session.createCriteria(Trainee.class).add(Restrictions.eq("isDeleted", false));
+            Criteria criteria = session.createCriteria(Trainee.class)
+                    .add(Restrictions.eq("isDeleted", false));
             trainees = criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
 
         } catch(HibernateException e) {
@@ -163,7 +165,8 @@ public class  EmployeeDaoImpl implements EmployeeDao{
         List<Trainer> trainers = new ArrayList<>();
  
         try (Session session = ConfigureClass.getFactory().openSession();) {
-            Criteria criteria = session.createCriteria(Trainer.class).add(Restrictions.eq("isDeleted", false));
+            Criteria criteria = session.createCriteria(Trainer.class)
+                    .add(Restrictions.eq("isDeleted", false));
             trainers = criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
         } catch(HibernateException e) {
 
@@ -247,7 +250,6 @@ public class  EmployeeDaoImpl implements EmployeeDao{
             session.update(trainee);
             message = "trainee Details updated Successfully";
             transaction.commit();
-
         } catch(HibernateException e) {
 
             if(transaction!=null) {
@@ -275,7 +277,6 @@ public class  EmployeeDaoImpl implements EmployeeDao{
             session.update(trainer);
             message = "Trainer Details updated Successfully";
             transaction.commit();
-
         } catch(HibernateException e) {
 
             if(transaction!=null) {

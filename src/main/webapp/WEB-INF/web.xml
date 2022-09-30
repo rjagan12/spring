@@ -1,41 +1,24 @@
-<!DOCTYPE web-app PUBLIC
- "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
- "http://java.sun.com/dtd/web-app_2_3.dtd" >
-
-<web-app>
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+          http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="2.5">
+  <display-name>Spring MVC Hibernate CRUD Example</display-name>
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>/WEB-INF/spring-servlet.xml</param-value>
+  </context-param>
+  <listener>
+    <listener-class>
+      org.springframework.web.context.ContextLoaderListener
+    </listener-class>
+  </listener>
   <servlet>
-    <servlet-name>servlet1</servlet-name>
-    <servlet-class>com.i2i.controller.TrainerServlet</servlet-class>
+    <servlet-name>spring</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
   </servlet>
-
   <servlet-mapping>
-    <servlet-name>servlet1</servlet-name>
-    <url-pattern>/Trainer</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>servlet1</servlet-name>
-    <url-pattern>/Trainers</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <servlet-name>servlet2</servlet-name>
-    <servlet-class>com.i2i.controller.TraineeServlet</servlet-class>
-  </servlet>
-
-  <servlet-mapping>
-    <servlet-name>servlet2</servlet-name>
-    <url-pattern>/Trainee</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>servlet2</servlet-name>
-    <url-pattern>/Trainees</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>servlet2</servlet-name>
-    <url-pattern>/assignTrainer</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>servlet1</servlet-name>
-    <url-pattern>/assignTrainee</url-pattern>
+    <servlet-name>spring</servlet-name>
+    <url-pattern>/</url-pattern>
   </servlet-mapping>
 </web-app>

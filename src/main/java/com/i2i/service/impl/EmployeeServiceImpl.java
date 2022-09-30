@@ -10,6 +10,8 @@ import com.i2i.dao.impl.EmployeeDaoImpl;
 import com.i2i.model.Trainer;
 import com.i2i.model.Trainee;
 import com.i2i.service.EmployeeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * <h> EmployeeServiceImpl </h> 
@@ -22,9 +24,13 @@ import com.i2i.service.EmployeeService;
  * @version 1.0
  * @author Jaganathan R  
  */
+@Service
 public class EmployeeServiceImpl implements EmployeeService {
 
-    private EmployeeDao employeeDao = new EmployeeDaoImpl();
+    private EmployeeDao employeeDao  ;
+    public EmployeeServiceImpl(EmployeeDaoImpl employeeDao) {
+        this.employeeDao = employeeDao;
+    }
 
     /**
      * Method used to add All trainees Details 

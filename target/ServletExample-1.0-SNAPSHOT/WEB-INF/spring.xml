@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:web="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         id="WebApp_ID" version="2.5">
+
+    <beans xmlns:context="http://www.springframework.org/schema/context"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns="http://www.springframework.org/schema/beans"
+           xsi:schemaLocation="
+   http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd>
+
+        <bean class=" org.springframework.web.servlet.view.InternalResourceViewResolver" >
+        </bean>
+
+        <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
+        <bean name="/Trainer/"
+              class="com.i2i.controller.TraineeServlet"/>
+        <bean name="/Trainee/"
+              class="com.i2i.controller.TraineeServlet"/>
+    </beans>
+    </web-app>
