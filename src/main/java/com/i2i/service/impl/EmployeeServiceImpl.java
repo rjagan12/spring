@@ -10,7 +10,6 @@ import com.i2i.dao.impl.EmployeeDaoImpl;
 import com.i2i.model.Trainer;
 import com.i2i.model.Trainee;
 import com.i2i.service.EmployeeService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -171,7 +170,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return {@link String }return status
      */
     @Override
-    public String removeIdFromAssignedTrainer(int trainersId, Trainer trainer) throws Exception {
+    public String removeAssignedTrainee(int trainersId, Trainer trainer) throws Exception {
         
 	return employeeDao.updateTrainerDetails(trainersId, trainer); 
     }
@@ -182,7 +181,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return {@link String }return status
      */
     @Override   
-    public String removeIdFromAssignedTrainee(int traineesId, Trainee trainee) throws Exception {
+    public String removeAssignedTrainer(int traineesId, Trainee trainee) throws Exception {
 
 	return employeeDao.updateTraineeDetails(traineesId,trainee); 
     }

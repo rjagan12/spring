@@ -108,14 +108,14 @@ public interface EmployeeService {
      * @param {@link int }trainerid 
      * @return {@link String }return status
      */
-    public String removeIdFromAssignedTrainer(int trainersId, Trainer tariner) throws Exception;
+    String removeAssignedTrainee(int trainersId, Trainer trainer) throws Exception;
 
     /**
      * Method used to remove trainee from trainer 
      * @param {@link String}traineeid 
      * @return {@link String }return status
-     */   
-    public String removeIdFromAssignedTrainee(int traineesId, Trainee trainee) throws Exception;
+     */
+    String removeAssignedTrainer(int traineesId, Trainee trainee) throws Exception;
 
     public Map<String, Object> getTrainerObject(Trainer trainer);
     public Map<String, Object> getTraineeObject(Trainee trainee);

@@ -8,6 +8,7 @@ import com.i2i.model.Trainer;
 import com.i2i.service.EmployeeService;
 import com.i2i.util.CommonUtil;
 import jdk.internal.org.objectweb.asm.tree.analysis.Value;
+import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -47,194 +48,155 @@ public class TrainerController extends HttpServlet {
 
     }
 
-    @PutMapping("/Trainer")
-    protected void doPut(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String message = "***** Details Not Modify *****";
-        Trainer trainer = null;
-        String uri = request.getRequestURI();
-        String value = request.getParameter("id");
-        int id = Integer.parseInt(value);
-
-        if (uri.equals("/spring/Trainer")) {
-
-            try {
-                StringBuilder buffer = new StringBuilder();
-                BufferedReader reader = request.getReader();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                }
-                String trainerDetails = buffer.toString();
-                trainer = mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                            .findAndRegisterModules().readValue(trainerDetails, Trainer.class);
-                message = employeeService.modifyTrainerDetailsById(id, trainer);
-                response.getOutputStream().println(message);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+    /**
+     * Method used to put or update trainer details  to server
+     * @param {@link @RequestBody Trainer}trainer
+     * @return {String}Status of trainer details
+     */
+    @PutMapping("/update_trainer")
+    public String updateTrainer(@RequestBody Trainer trainer ) throws Exception {
+        String message =" Failed ::TRAINER DETAILS  NOT UPDATED";
+        int id = trainer.getId();
+        if (null != trainer) {
+            return  employeeService.modifyTrainerDetailsById(id, trainer);
         } else {
-            try {
-                List<Trainee> list = null;
-                int trainerId = Integer.parseInt(request.getParameter("id"));
-                trainer = employeeService.showTrainerDetailsById(trainerId);
-                String ids = request.getParameter("traineeIds");
-                String[] traineeId = ids.split(",");
-
-                for (int i = 0; i < traineeId.length; i++) {
-                    int traineesId = Integer.valueOf(traineeId[i]);
-                    Trainee trainee = employeeService.showTraineeDetailsById(traineesId);
-
-                    if (trainee != null) {
-                        trainer.getTraineeDetails().add(trainee);
-
-                    } else {
-                        message = "**** THERE IS NO TRAINEE ID *****";
-                    }
-                }
-                message = employeeService.assignTrainees(trainerId, trainer);
-                response.getOutputStream().println(message);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            return message;
         }
+    }
+
+    /**
+     * Method used to put or update trainer details with assigning the trainees
+     * @param {@link @pathVariable int, String}trainerId,traineeIds
+     * @return {String}Status of trainer details
+     */
+    @PutMapping("/assign_trainee/{trainerId}/{traineeId}")
+    public String assignTrainee(@PathVariable int trainerId,
+                                @PathVariable String traineeId) throws Exception {
+       String message = "Failed :: Trainee Assign Is Not Updated";
+       Trainer trainer = employeeService.showTrainerDetailsById(trainerId);
+
+       if (null != trainer) {
+           String[] traineeIds = traineeId.split(",");
+           for (int i = 0; i < traineeIds.length; i++) {
+               int id = Integer.valueOf(traineeIds[i]);
+               Trainee trainee = employeeService.showTraineeDetailsById(id);
+
+               if (trainee != null) {
+                   trainer.getTraineeDetails().add(trainee);
+               } else {
+                   message = "**** THERE IS NO TRAINEE ID *****";
+               }
+           }
+           message = employeeService.assignTrainees(trainerId, trainer);
+           return message;
+       } else {
+           return message + "**** THERE IS NO TRAINER ID *****";
+
+       }
     }
 
     /**
      * Method used to post or add trainer details  to server
-     * @param {@link HttpServletrequest, HttpServletResponse}request and response
-     * @return {noreturn}
+     * @param {@link @RequestBody Trainer}trainer
+     * @return {String}Status of trainer details
      */
-    @PostMapping(path = "/Trainer")
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String uri = request.getRequestURI();
-        String message = "***** Not Inserted ******";
-
-        try {
-            if (uri.equals("/spring/Trainer")) {
-                StringBuilder buffer = new StringBuilder();
-                BufferedReader reader = request.getReader();
-                 String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line);
-                }
-                String trainerDetails = buffer.toString();
-                System.out.println(trainerDetails);
-                Trainer trainer = mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                          .findAndRegisterModules().readValue(trainerDetails, Trainer.class);
-                System.out.println(trainer);
-                message = dataValidation(trainer, response);
-                response.getOutputStream().println(message);
-            } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                response.getOutputStream().println(message);
-            }
-        } catch(DateTimeException | InvalidFormatException exception) {
-            response.getOutputStream().println(message + exception + "\n Please Enter The VALID DATE (yyyy-mm-dd)");
-        } catch (Exception exception) {
-            exception.printStackTrace();
+    @PostMapping(path = "/save_trainer")
+    public String addTrainer(@RequestBody Trainer trainer) throws IOException {
+        String message = " Failed :: Not Inserted ";
+        if (null != trainer) {
+           return message = dataValidation(trainer, response);
+        } else{
+            return message;
         }
     }
     /**
-     * Method used to delete trainer details  from server
-     * @param {@link HttpServletrequest, HttpServletResponse}request and response
-     * @return {noreturn}
+     * Method used to delete trainer details  from server  by id
+     * @param {@link @pathVariable int}id
+     * @return {String} returns the status message
      */
-
-    @RequestMapping("Delete")
-    protected void doDelete(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    @DeleteMapping("/delete_trainer/{id}")
+    public String doDelete(@PathVariable int id)
+            throws Exception {
         String message = "******* there is no record to Delete *******";
-        String uri = request.getRequestURI();
-        if (uri.equals("/demoservlet/Trainer")) {
-            String value = request.getParameter("id");
-            int id = Integer.parseInt(value);
-            try {
-                message = employeeService.deleteTrainerDetails(id);
-                response.getOutputStream().println(message);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
+        if (0 < id) {
+            return message = employeeService.deleteTrainerDetails(id);
         } else {
-            int trainerId = Integer.parseInt(request.getParameter("id"));
-            Trainer trainer = null;
-            message = "******* THERE IS NO ID TO REMOVE ********";
-
-            try {
-                trainer = employeeService.showTrainerDetailsById(trainerId);
-                int traineeId = Integer.parseInt(request.getParameter("traineeId"));
-                message = employeeService.removeIdFromAssignedTrainer(trainerId, removeTrainee(traineeId, trainer));
-                response.getOutputStream().println(message);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
+            return message +" Enter The Valid Id ";
         }
+
+    }
+
+    @DeleteMapping("/unassign_trainee/{trainerId}/{traineeId}")
+    public String unAssignTrainee(@PathVariable int trainerId,
+                                  @PathVariable String traineeId) throws Exception {
+        String message = "******* THERE IS NO ID TO REMOVE ******** ";
+        System.out.println("message1 : " +message);
+        Trainer trainer = null;
+        trainer = employeeService.showTrainerDetailsById(trainerId);
+        System.out.println("trainer1 " +trainer);
+        if (null != trainer) {
+            Trainer trainerDetails = removeTrainee(traineeId, trainer);
+            System.out.println("TrainerDetails"+trainerDetails.getTraineeDetails());
+            message = employeeService.removeAssignedTrainee(trainerId, trainerDetails);
+        }
+        return message;
     }
 
     /**
      * Method used to remove trainee details  from trainers
-     * @param {@link HttpServletrequest, HttpServletResponse}request and response
+     * @param {@link int, Trainer}traineeId,trainer
      * @return {@link Trainer}returns trainer object
      */
-  /*  private Trainer removeTrainee(int traineeId, Trainer trainer) throws Exception {
-        List<Trainee> list = trainer.getTraineeDetails();
-        try {
-            if (list.size() >= 1) {
-                for (int i = 0; i < list.size(); i++) {
-
-                    if ((list.get(i).getId()) == (traineeId)) {
-                        list.remove(i);
-                    }
-                }
-                trainer.setTraineeDetails(list);
-            } else {
-                String message = "***** THERE IS NO ID TO REMOVE ******";
-            }
-
-        } catch (HibernateException e) {
-            throw e;
-        }
+   private Trainer removeTrainee(String traineeId, Trainer trainer) throws Exception {
+       List<Trainee> list = trainer.getTraineeDetails();
+       System.out.println("message1 : " +list);
+       String[] id = traineeId.split(",");
+       if (list.size() >= 1) {
+           for (int i = 0; i < list.size(); i++) {
+               for (int j = 0; j < id.length; j++) {
+                   int traineeid = Integer.valueOf(id[j]);
+                  // if ((traineeId) == (list.get(i).getId())) {
+                   //    list.remove(i);
+                   //} else {
+                   //    String message = "***** THERE IS NO ID TO REMOVE ******";
+                   //}
+               }
+           }
+           trainer.setTraineeDetails(list);
+           return trainer;
+       } else {
+           String message = "***** THERE IS NO ID TO REMOVE ******";
+       }
         return trainer;
-    }    */
+   }
     /**
-     * Method used to get trainer details  from server
+     * Method used to get All trainer details  from server
      *
-     * @param {@link HttpServletrequest, HttpServletResponse}request and response
-     * @return {noreturn}
+     * @param {@link noparam}
+     * @return {List<Trainer>} returns list of trainer details
+     *
      */
-    @GetMapping("/Trainers")
-    protected ResponseEntity<List<Trainer>> getAllTrainers() throws IOException {
 
-
-        List<Trainer> showTrainer = null;
-        try {
-            showTrainer = employeeService.showAllTrainerDetails();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    @GetMapping("/trainer/{id}")
+    @ResponseBody
+    public Trainer getTrainerById(@PathVariable int id ) throws Exception {
+        Trainer trainer = null;
+        trainer = employeeService.showTrainerDetailsById(id);
+        if (null!=trainer) {
+            return trainer;
+        } else {
+            return trainer;
         }
-        return ResponseEntity.ok().body(showTrainer);
-    }
-    @GetMapping("/Trainer/{id}")
-    public ResponseEntity<Trainer> getTrainerById(@PathVariable Integer id ) throws IOException {
-
-           int ids = Integer.valueOf(id);
-          Trainer trainer = null;
-
-          try {
-              trainer = employeeService.showTrainerDetailsById(ids);
-              if ( null != trainer) {
-                  return ResponseEntity.ok().body(trainer);
-              }
-          } catch (Exception e) {
-              throw new RuntimeException(e);
-         }
-          return ResponseEntity.ok().body(trainer);
     }
 
+    @GetMapping("/trainers")
+    @ResponseBody
+    public List<Trainer> getAllTrainers() throws Exception {
+
+        List<Trainer> showTrainers = null;
+        showTrainers = employeeService.showAllTrainerDetails();
+        return showTrainers;
+    }
     /**
      * Method used to validate  trainer details  from input datas
      * @param {@link HttpServletrequest, HttpServletResponse}request and response
@@ -267,21 +229,35 @@ public class TrainerController extends HttpServlet {
                                 Long aadharNumber = trainer.getAadharNumber();
                                 if (CommonUtil.aadharValidation(aadharNumber)) {
                                     trainers.setAadharNumber(aadharNumber);
-                                    try {
+                                    String companyName = trainer.getcompanyName();
+                                    if (CommonUtil.panValidation(companyName)) {
+                                        trainers.setcompanyName(companyName);
+                                        int experience = trainer.getExperience();
+                                        if (0 != experience) {
+                                            trainers.setExperience(experience);
+                                            try {
                                         
-                                        LocalDate dateOfBirth = trainer.getDateOfBirth();
-                                        trainers.setDateOfBirth(LocalDate.of(dateOfBirth.getYear()
-                                                , dateOfBirth.getMonthValue(), dateOfBirth.getDayOfMonth()));
-                                        LocalDate dateOfJoin = trainer.getDateOfJoin();
-                                        trainers.setDateOfJoin(LocalDate.of(dateOfJoin.getYear()
-                                                , dateOfJoin.getMonthValue(), dateOfJoin.getDayOfMonth()));
-                                        message = employeeService.addTrainerDetails(trainers);
-                                    } catch (DateTimeException exception) {
-                                        throw new DateTimeException( "\n Please Enter The VALID DATE (yyyy-mm-dd)");
-                                    }catch(RuntimeException exception){
-                                        throw new RuntimeException(""+ exception);
-                                    } catch (Exception e) {
-                                        throw new RuntimeException(e);
+                                                 LocalDate dateOfBirth = trainer.getDateOfBirth();
+                                                 trainers.setDateOfBirth(LocalDate.of(dateOfBirth.getYear()
+                                                      , dateOfBirth.getMonthValue(), dateOfBirth.getDayOfMonth()));
+                                                 LocalDate dateOfJoin = trainer.getDateOfJoin();
+                                                 trainers.setDateOfJoin(LocalDate.of(dateOfJoin.getYear()
+                                                         , dateOfJoin.getMonthValue(), dateOfJoin.getDayOfMonth()));
+                                                 message = employeeService.addTrainerDetails(trainers);
+                                            } catch (DateTimeException exception) {
+                                                 throw new DateTimeException( "\n Please Enter The VALID DATE (yyyy-mm-dd)");
+                                            }catch(RuntimeException exception){
+                                                 throw new RuntimeException(""+ exception);
+                                            } catch (Exception e) {
+                                                 throw new RuntimeException(e);
+                                            }
+                                        } else {
+                                            response.getOutputStream().println(message +
+                                                    "\nPlease Enter The Exerience(< 1) ");
+                                        }
+                                    } else {
+                                        response.getOutputStream().println(message +
+                                                "\nPlease Enter The Valid CompanyName ");
                                     }
                                 } else {
                                     response.getOutputStream().println(message +

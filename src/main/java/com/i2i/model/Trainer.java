@@ -1,5 +1,9 @@
 package com.i2i.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -30,27 +34,29 @@ public class Trainer extends Employee {
     private int experience;
 
     @Column(name = "company_name")
-    private String previousCompanyName;
+    private String companyName;
 
-    @ManyToMany(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JoinTable(name = "trainers_trainees",
                joinColumns = {@JoinColumn(name = "trainer_id")})
+    @JsonIgnore
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Trainee> trainee;
    
     public void setExperience(int experience) {
         this.experience = experience;
     }
 
-    public void setPreviousCompanyName(String previousCompanyName) {
-        this.previousCompanyName = previousCompanyName;
+    public void setcompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
     public int getExperience() {
         return experience;
     }
 
-    public String getPreviousCompanyName() {
-        return previousCompanyName;
+    public String getcompanyName() {
+        return companyName;
     }
 
     public List<Trainee> getTraineeDetails() {

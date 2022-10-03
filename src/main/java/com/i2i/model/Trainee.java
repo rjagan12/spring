@@ -1,5 +1,11 @@
 package com.i2i.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.FetchMode;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
 import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -29,9 +35,12 @@ public class Trainee extends Employee {
     @Column(name = "year_of_passing")
     private LocalDate passOutYear;
 
-    @ManyToMany(targetEntity = Trainer.class, cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+    @ManyToMany(targetEntity = Trainer.class, cascade = {CascadeType.PERSIST
+                 , CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JoinTable(name = "trainers_trainees",
-                joinColumns = {@JoinColumn(name = "trainee_id")}) 
+                joinColumns = {@JoinColumn(name = "trainee_id")})
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @JsonIgnore
     private List<Trainer> trainer;
 
     public void setPassOutYear(LocalDate passOutYear) {

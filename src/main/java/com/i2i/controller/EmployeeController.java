@@ -277,7 +277,7 @@ public class EmployeeController extends HttpServlet {
                             Trainer trainer = removeIdFromAssign(scanner, trainerId);
 
                             logger.info((trainer != null) 
-                                         ? (employeeService.removeIdFromAssignedTrainer(trainerId, trainer))
+                                         ? (employeeService.removeAssignedTrainee(trainerId, trainer))
                                          : ("******* THERE IS NO ID OR RECORD TO REMOVE ********"));
 
                         } else if (2 == enteredValue) {
@@ -286,7 +286,7 @@ public class EmployeeController extends HttpServlet {
                             Trainee trainee = removeTraineeIdFromAssign(scanner, traineeId);
 
                             logger.info((trainee != null) 
-                                         ? (employeeService.removeIdFromAssignedTrainee(traineeId, trainee))
+                                         ? (employeeService.removeAssignedTrainer(traineeId, trainee))
                                          : ("******* THERE IS NO ID OR RECORD TO REMOVE ********"));
                         } else {
                             logger.error("{}",inValidData);
@@ -436,7 +436,7 @@ public class EmployeeController extends HttpServlet {
             previousCompanyName = scanner.nextLine();
         }
 
-        trainer.setPreviousCompanyName(previousCompanyName);
+        trainer.setcompanyName(previousCompanyName);
         System.out.println("Enter The Previous Company Experience ");
         int experience = scanner.nextInt();
         trainer.setExperience(experience);
