@@ -36,7 +36,7 @@ public class  EmployeeDaoImpl implements EmployeeDao{
      * @return {@link String }return status
      */
     @Override
-    public String insertTraineeDetails(Trainee trainee) throws Exception {
+    public String insertTraineeDetails(Trainee trainee) throws HibernateException {
 	
 	Transaction transaction = null;
 	String message = "Details Not Added Successfully";
@@ -49,9 +49,6 @@ public class  EmployeeDaoImpl implements EmployeeDao{
 	
 	} catch(HibernateException e) {
 
-	    if(transaction != null) {
-		transaction.rollback();
-	    }	  
 	    throw e;
 	}
 	return message;
@@ -64,7 +61,7 @@ public class  EmployeeDaoImpl implements EmployeeDao{
      * @return {@link String }return status
      */
     @Override
-    public String insertTrainerDetails(Trainer trainer) throws Exception {
+    public String insertTrainerDetails(Trainer trainer) throws HibernateException {
 	
 	Transaction transaction = null;
 	String message = "Details Not Added Successfully";
@@ -77,9 +74,6 @@ public class  EmployeeDaoImpl implements EmployeeDao{
 	
 	} catch(HibernateException e) {
 
-	    if(transaction != null) {
-		transaction.rollback();
-	    }	  
 	    throw e;
 	}
 	return message;
@@ -92,7 +86,7 @@ public class  EmployeeDaoImpl implements EmployeeDao{
      * @return {@link Trainee }return traineeDetails
      */
     @Override
-    public Trainee displayTraineeDetailsById(int traineeId) throws Exception {
+    public Trainee displayTraineeDetailsById(int traineeId) throws HibernateException {
 
         Transaction transaction = null;
         Trainee trainee = null;
@@ -105,7 +99,7 @@ public class  EmployeeDaoImpl implements EmployeeDao{
 
             throw e;
         }
-        return trainee; 
+        return trainee;
     }
 
     /**
@@ -114,22 +108,26 @@ public class  EmployeeDaoImpl implements EmployeeDao{
      * @return {@link Trainer }return trainerDetails
      */
     @Override
-    public Trainer displayTrainerDetailsById(int trainerId) throws Exception {
+    public Trainer displayTrainerDetailsById(int trainerId) throws HibernateException {
 
         Transaction transaction = null;
         Trainer trainer = null;
 
         try(Session session = ConfigureClass.getFactory().openSession();) {
             transaction = session.beginTransaction();
-            trainer = (Trainer) session.get(Trainer.class, trainerId);
+
+            if (session.get(Trainer.class, trainerId) != null) {
+                trainer = (Trainer) session.get(Trainer.class, trainerId);
+                return trainer;
+            } else {
+                return trainer;
+            }
 
         } catch(HibernateException e) {
 
             throw e;
         }
-        return trainer;
     }
-
 
     /**
      * Method used to show All trainees Details 
@@ -137,7 +135,7 @@ public class  EmployeeDaoImpl implements EmployeeDao{
      * @return {@link List<Trainee> }return traineeDetails
      */
     @Override
-    public List<Trainee> retrieveTraineesDetails() throws Exception {
+    public List<Trainee> retrieveTraineesDetails() throws HibernateException {
 
         List<Trainee> trainees = new ArrayList<>(); 
 
@@ -153,14 +151,13 @@ public class  EmployeeDaoImpl implements EmployeeDao{
         return trainees;
     }
 
-
     /**
      * Method used to show All trainers Details 
      * @param {@link noparam} 
      * @return {@link List<Trainer> }return trainerDetails
      */
     @Override
-    public List<Trainer> retrieveTrainersDetails() throws Exception {
+    public List<Trainer> retrieveTrainersDetails() throws HibernateException {
 
         List<Trainer> trainers = new ArrayList<>();
  
@@ -181,7 +178,7 @@ public class  EmployeeDaoImpl implements EmployeeDao{
      * @return {@link String }return status
      */
     @Override
-    public String removeTraineeDetails(int id) throws Exception {
+    public String removeTraineeDetails(int id) throws HibernateException {
 
         Transaction transaction = null;
         String message = "Trainee Details not deleted";
@@ -196,9 +193,6 @@ public class  EmployeeDaoImpl implements EmployeeDao{
 
         } catch (HibernateException e) {
 
-            if(transaction != null) {
-                transaction.rollback();
-            }
             throw e;
         }
         return message;
@@ -210,7 +204,7 @@ public class  EmployeeDaoImpl implements EmployeeDao{
      * @return {@link String }return status
      */
     @Override
-    public String removeTrainerDetails(int id) throws Exception {
+    public String removeTrainerDetails(int id) throws HibernateException {
 
         Transaction transaction = null;
         String message = "Trainer Details not deleted";
@@ -225,14 +219,10 @@ public class  EmployeeDaoImpl implements EmployeeDao{
 
         } catch (HibernateException e) {
 
-            if(transaction != null) {
-                transaction.rollback();
-            }
             throw e;
         }
         return message;
     }
-
 
     /**
      * Method used to update trainee Details by id 
@@ -240,7 +230,7 @@ public class  EmployeeDaoImpl implements EmployeeDao{
      * @return {@link String}return status
      */
     @Override
-    public String updateTraineeDetails(int traineeId, Trainee trainee) throws Exception {
+    public String updateTraineeDetails(int traineeId, Trainee trainee) throws HibernateException {
 
         Transaction transaction = null;
         String message = "Trainee details not updated successfully";
@@ -252,14 +242,10 @@ public class  EmployeeDaoImpl implements EmployeeDao{
             transaction.commit();
         } catch(HibernateException e) {
 
-            if(transaction!=null) {
-                transaction.rollback();
-            }
             throw e;
         }
         return message;
     }
-
 
     /**
      * Method used to update trainer Details by id 
@@ -267,7 +253,7 @@ public class  EmployeeDaoImpl implements EmployeeDao{
      * @return {@link String}return status
      */
     @Override
-    public String updateTrainerDetails(int trainerId, Trainer trainer) throws Exception {
+    public String updateTrainerDetails(int trainerId, Trainer trainer) throws HibernateException {
 
         Transaction transaction = null;
         String message = "Trainer details not updated successfully";
@@ -279,14 +265,8 @@ public class  EmployeeDaoImpl implements EmployeeDao{
             transaction.commit();
         } catch(HibernateException e) {
 
-            if(transaction!=null) {
-                transaction.rollback();
-            }
             throw e;
         }
         return message;
-
-    } 
-
-
+    }
 }

@@ -1,28 +1,24 @@
 package com.i2i.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.i2i.exception.NullListException;
 import com.i2i.model.Trainee;
 import com.i2i.model.Trainer;
 import com.i2i.service.EmployeeService;
 import com.i2i.util.CommonUtil;
-import jdk.internal.org.objectweb.asm.tree.analysis.Value;
 import org.hibernate.HibernateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <h> TrainerServlet </h>
@@ -40,6 +36,7 @@ public class TrainerController extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(TrainerController.class);
     private static EmployeeService employeeService ;
     private ObjectMapper mapper = new ObjectMapper();
+    private  NullListException message = new NullListException("ID NOT FOUND");
     private HttpServletResponse response;
     private HttpServletRequest request;
 
@@ -73,13 +70,13 @@ public class TrainerController extends HttpServlet {
     public String assignTrainee(@PathVariable int trainerId,
                                 @PathVariable String traineeId) throws Exception {
        String message = "Failed :: Trainee Assign Is Not Updated";
-       Trainer trainer = employeeService.showTrainerDetailsById(trainerId);
+       Trainer trainer = employeeService.displayTrainerDetailsById(trainerId);
 
        if (null != trainer) {
            String[] traineeIds = traineeId.split(",");
            for (int i = 0; i < traineeIds.length; i++) {
                int id = Integer.valueOf(traineeIds[i]);
-               Trainee trainee = employeeService.showTraineeDetailsById(id);
+               Trainee trainee = employeeService.displayTraineeDetailsById(id);
 
                if (trainee != null) {
                    trainer.getTraineeDetails().add(trainee);
@@ -101,10 +98,10 @@ public class TrainerController extends HttpServlet {
      * @return {String}Status of trainer details
      */
     @PostMapping(path = "/save_trainer")
-    public String addTrainer(@RequestBody Trainer trainer) throws IOException {
+    public String addTrainer(@RequestBody Trainer trainer) throws IOException,Exception {
         String message = " Failed :: Not Inserted ";
         if (null != trainer) {
-           return message = dataValidation(trainer, response);
+           return message = employeeService.addTrainerDetails(trainer);
         } else{
             return message;
         }
@@ -128,47 +125,31 @@ public class TrainerController extends HttpServlet {
 
     @DeleteMapping("/unassign_trainee/{trainerId}/{traineeId}")
     public String unAssignTrainee(@PathVariable int trainerId,
-                                  @PathVariable String traineeId) throws Exception {
+                                  @PathVariable int traineeId) throws Exception {
         String message = "******* THERE IS NO ID TO REMOVE ******** ";
         System.out.println("message1 : " +message);
         Trainer trainer = null;
-        trainer = employeeService.showTrainerDetailsById(trainerId);
+        trainer = employeeService.displayTrainerDetailsById(trainerId);
         System.out.println("trainer1 " +trainer);
         if (null != trainer) {
-            Trainer trainerDetails = removeTrainee(traineeId, trainer);
-            System.out.println("TrainerDetails"+trainerDetails.getTraineeDetails());
-            message = employeeService.removeAssignedTrainee(trainerId, trainerDetails);
+            List<Trainee> list = trainer.getTraineeDetails();
+            System.out.println("trainer2 " +list);
+            if (list.size() >= 1) {
+                for (int i = 0; i < list.size(); i++) {
+                    if ((list.get(i).getId()) == (traineeId)) {
+                        list.remove(i);
+                        System.out.println("trainer3 " +list);
+                    }
+                }
+            } else {
+                message = "***** THERE IS NO ID TO REMOVE ******";
+            }
+            message = employeeService.removeAssignedTrainee(trainerId,trainer);
         }
         return message;
     }
 
-    /**
-     * Method used to remove trainee details  from trainers
-     * @param {@link int, Trainer}traineeId,trainer
-     * @return {@link Trainer}returns trainer object
-     */
-   private Trainer removeTrainee(String traineeId, Trainer trainer) throws Exception {
-       List<Trainee> list = trainer.getTraineeDetails();
-       System.out.println("message1 : " +list);
-       String[] id = traineeId.split(",");
-       if (list.size() >= 1) {
-           for (int i = 0; i < list.size(); i++) {
-               for (int j = 0; j < id.length; j++) {
-                   int traineeid = Integer.valueOf(id[j]);
-                  // if ((traineeId) == (list.get(i).getId())) {
-                   //    list.remove(i);
-                   //} else {
-                   //    String message = "***** THERE IS NO ID TO REMOVE ******";
-                   //}
-               }
-           }
-           trainer.setTraineeDetails(list);
-           return trainer;
-       } else {
-           String message = "***** THERE IS NO ID TO REMOVE ******";
-       }
-        return trainer;
-   }
+
     /**
      * Method used to get All trainer details  from server
      *
@@ -178,11 +159,12 @@ public class TrainerController extends HttpServlet {
      */
 
     @GetMapping("/trainer/{id}")
-    @ResponseBody
-    public Trainer getTrainerById(@PathVariable int id ) throws Exception {
-        Trainer trainer = null;
-        trainer = employeeService.showTrainerDetailsById(id);
-        if (null!=trainer) {
+    public Map<String, Object> getTrainerById(@PathVariable int id )
+            throws NullListException, Exception {
+
+        Map<String, Object> trainer = null;
+        if (CommonUtil.validateTrainers(employeeService.showTrainerDetailsById(id))) {
+            trainer = employeeService.showTrainerDetailsById(id);
             return trainer;
         } else {
             return trainer;
@@ -191,9 +173,9 @@ public class TrainerController extends HttpServlet {
 
     @GetMapping("/trainers")
     @ResponseBody
-    public List<Trainer> getAllTrainers() throws Exception {
+    public List<Map<String, Object>> getAllTrainers() throws Exception {
 
-        List<Trainer> showTrainers = null;
+        List<Map<String, Object>> showTrainers = null;
         showTrainers = employeeService.showAllTrainerDetails();
         return showTrainers;
     }
@@ -283,5 +265,9 @@ public class TrainerController extends HttpServlet {
         }
         return message ;
 
+    }
+    @ExceptionHandler(value = NullListException.class)
+    public String exceptionHandler(NullListException exception) {
+       return "RECORD NOT FOUND"+exception.getMessage();
     }
 }

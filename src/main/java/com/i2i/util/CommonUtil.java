@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.validator.routines.EmailValidator;
 
 import com.i2i.exception.NullListException;
@@ -91,11 +92,10 @@ public class CommonUtil {
      * @param {@link List< Trainer>} list of trainers
      * @return {@link boolean}returns true or Exception
      */
-    public static boolean validateTrainers(List< Trainer> Trainers) throws NullListException {
-        if (Trainers.size() == 0) {
+    public static boolean validateTrainers(Map<String, Object> Trainer) throws NullListException {
+        if (Trainer == null) {
              
-            throw new NullListException(" ************* THERE IS NO RECORD IN DATABAE *********** ");
-            
+            throw new NullListException(" ************* THERE IS NO RECORD IN DATABASE *********** ");
         } 
         return true;
     } 
@@ -105,10 +105,9 @@ public class CommonUtil {
      * @param {@link List< Trainee>} list of trainees
      * @return {@link boolean}returns true or Exception
      */
-    public static boolean validateTrainees(List< Trainee> Trainees) throws NullListException {
-        if (Trainees.size()==0) {
+    public static boolean validateTrainees(Map<String, Object> trainee) throws NullListException {
+        if (trainee == null) {
             throw new NullListException(" ******** THERE IS NO RECORD IN DATABASE *********** ");
-           
         } 
         return true;
     }

@@ -7,9 +7,11 @@ import java.util.Map;
 
 import com.i2i.dao.EmployeeDao;
 import com.i2i.dao.impl.EmployeeDaoImpl;
+import com.i2i.exception.NullListException;
 import com.i2i.model.Trainer;
 import com.i2i.model.Trainee;
 import com.i2i.service.EmployeeService;
+import org.hibernate.HibernateException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,6 +29,8 @@ import org.springframework.stereotype.Service;
 public class EmployeeServiceImpl implements EmployeeService {
 
     private EmployeeDao employeeDao  ;
+    private  NullListException message = new NullListException("ID NOT FOUND");
+
     public EmployeeServiceImpl(EmployeeDaoImpl employeeDao) {
         this.employeeDao = employeeDao;
     }
@@ -43,14 +47,20 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
-     * Method used to show All trainees Details 
-     * @param {@link noparam}  
+     * Method used to show All trainees Details
+     *
+     * @param {@link noparam}
      * @return {@link List<Trainee> }return traineeDetails
      */
     @Override
-    public List<Trainee> showAllTraineeDetails() throws Exception {
+    public List<Map<String, Object>> showAllTraineeDetails() throws Exception {
+        List<Map<String, Object>> traineeDetails = new ArrayList<>();
+        List<Trainee> trainee = employeeDao.retrieveTraineesDetails();
 
-        return employeeDao.retrieveTraineesDetails();
+        for (Trainee trainees: trainee ) {
+            traineeDetails.add(getTraineeObject(trainees));
+        }
+        return traineeDetails;
     }
 
     /**
@@ -71,9 +81,12 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return {@link Trainee }return traineeDetails
      */
     @Override
-    public Trainee showTraineeDetailsById(int traineeId) throws Exception {
+    public Map<String, Object> showTraineeDetailsById(int traineeId) throws Exception {
 
-        return employeeDao.displayTraineeDetailsById(traineeId);
+        Trainee trainee = employeeDao.displayTraineeDetailsById(traineeId);
+
+        return (null != trainee) ? getTraineeObject(trainee) : null;
+
     }
 
     /**
@@ -104,9 +117,14 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return {@link List<Trainer> }return trainerDetails
      */
     @Override
-    public List<Trainer> showAllTrainerDetails() throws Exception {
-
-        return employeeDao.retrieveTrainersDetails();
+    public List<Map<String, Object>> showAllTrainerDetails() throws Exception {
+        Map<String, Object> trainerDetails = null;
+        List<Map<String, Object>> trainers = new ArrayList<>();
+        List<Trainer> list = employeeDao.retrieveTrainersDetails();
+        for (Trainer trainer:list) {
+            trainers.add( getTrainerObject(trainer));
+        }
+        return trainers;
     }
 
     /**
@@ -126,11 +144,42 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @return {@link Trainer }return trainerDetails
      */
     @Override
-    public Trainer showTrainerDetailsById(int trainerId) throws Exception {
+    public Map<String, Object> showTrainerDetailsById(int trainerId) throws Exception {
 
-        return employeeDao.displayTrainerDetailsById(trainerId);
+        Trainer trainer = null;
+        if (null != employeeDao.displayTrainerDetailsById(trainerId)) {
+            trainer = employeeDao.displayTrainerDetailsById(trainerId) ;
+            return getTrainerObject(trainer);
+        } else {
+            return (Map<String, Object>) trainer;
+        }
     }
+    /**
+     * Method used to show trainerDetails by id
+     * @param {@link int}trainerid
+     * @return {@link Trainee }return trainerDetails
+     */
+    @Override
+    public Trainee displayTraineeDetailsById(int traineeId) throws Exception {
+        return employeeDao.displayTraineeDetailsById(traineeId);
+    }
+    /**
+     * Method used to show trainerDetails by id
+     * @param {@link int}trainerid
+     * @return {@link Trainer }return trainerDetails
+     */
+    @Override
+    public Trainer displayTrainerDetailsById(int trainerId) throws Exception {
 
+        Trainer trainer = null;
+
+         if (employeeDao.displayTrainerDetailsById(trainerId) != null) {
+
+             return employeeDao.displayTrainerDetailsById(trainerId);
+         } else {
+             return trainer;
+         }
+    }
     /**
      * Method used to modify trainer details by id
      * @param {@link int, Trainer}trainerid and trainer 
@@ -183,9 +232,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override   
     public String removeAssignedTrainer(int traineesId, Trainee trainee) throws Exception {
 
-	return employeeDao.updateTraineeDetails(traineesId,trainee); 
+	    return employeeDao.updateTraineeDetails(traineesId,trainee);
     }
 
+    /**
+     * Method used to get Trainer Details and created a new collection to avoid
+     * Lazy exception while retrieve the trainers
+     * @param {@link Trainer}trainerDetails
+     * @return {@link Map<String, Object> }returns the trainerDetails
+     */
     @Override
     public Map<String, Object> getTrainerObject(Trainer trainer) {
         List<Map<String, Object>> trainee = new ArrayList<>();
@@ -207,6 +262,13 @@ public class EmployeeServiceImpl implements EmployeeService {
         map.put("trainees", trainee);
         return map;
     }
+
+    /**
+     * Method used to get Trainee Details and created a new collection to avoid
+     * Lazy exception while retrieve the trainees
+     * @param {@link Trainee}traineeDetails
+     * @return {@link Map<String, Object> }returns the traineeDetails
+     */
     @Override
     public Map<String, Object> getTraineeObject(Trainee trainee) {
 

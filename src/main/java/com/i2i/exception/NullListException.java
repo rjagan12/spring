@@ -1,6 +1,6 @@
 package com.i2i.exception;
 
-import java.lang.Exception;
+import java.lang.RuntimeException;
 
 /**
  * <h> NullListException </h> 
@@ -11,7 +11,7 @@ import java.lang.Exception;
  * @version 1.0
  * @author Jaganathan R  
  */
-public class NullListException extends Exception {
+public class NullListException extends RuntimeException {
 
     public NullListException(String s) {
       
